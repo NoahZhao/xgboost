@@ -303,6 +303,53 @@ struct LearnerTrainParam : public XGBoostParameter<LearnerTrainParam> {
   }
 };
 
+struct LearnerModelParam : public XGBoostParameter<LearnerModelParam> {
+  // number of features
+  uint32_t num_feature {0};
+  // number of output groups
+  uint32_t num_output_group {1};
+  // number of target for multi-target regression
+  uint32_t num_target {1};
+  // number of classes for multi-class classification
+  uint32_t num_class {0};
+  // base score of the model
+  float base_score {0.5f};
+  // whether we should calculate the base score from training data
+  bool boost_from_average {true};
+  // objective function
+  ObjFunction* objective {nullptr};
+  // model task
+  ObjInfo task {ObjInfo::kUnknown};
+
+  // constructor
+  LearnerModelParam() = default;
+  LearnerModelParam(LearnerModelParamLegacy const& user_param, ObjInfo t);
+  LearnerModelParam(Context const* ctx, LearnerModelParamLegacy const& user_param,
+                    linalg::Tensor<float, 1> base_margin, ObjInfo t);
+  // destructor
+  ~LearnerModelParam() {
+    delete objective;
+  }
+  // get base score
+  linalg::TensorView<float const, 1> BaseScore(int32_t device) const;
+  linalg::TensorView<float const, 1> BaseScore(Context const* ctx) const;
+  // copy from another model
+  void Copy(LearnerModelParam const& that);
+  // set base margin
+  void SetBaseMargin(linalg::Tensor<float, 1> base_margin);
+  // set base margin
+  void SetBaseMargin(Context const* ctx, linalg::Tensor<float, 1> base_margin);
+  // set base margin
+  void SetBaseMargin(Context const* ctx, HostDeviceVector<float> base_margin);
+  // set base margin
+  void SetBaseMargin(HostDeviceVector<float> base_margin);
+  // set base margin
+  void SetBaseMargin(linalg::Tensor<float, 1> base_margin, int32_t device);
+  // set base margin
+  void SetBaseMargin(Context const* ctx, linalg::Tensor<float, 1> base_margin, int32_t device);
+  // set base margin
+  void SetBaseMargin(Context const* ctx, HostDeviceVector<float> base_margin, int32_t device);
+  //
 
 DMLC_REGISTER_PARAMETER(LearnerModelParamLegacy);
 DMLC_REGISTER_PARAMETER(LearnerTrainParam);
